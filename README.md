@@ -14,7 +14,7 @@ CSV文件称逗号分隔值(Comma-Separated Values, CSV,有时也称为字符分
 
 注意：
 
-1. 本模板要求 TeXLive、MacTeX、MikTeX 不低于 2018 年的发行版，并且尽可能升级到最新。
+1. 本文档要求 TeXLive、MacTeX、MikTeX 不低于 2018 年的发行版，并且尽可能升级到最新。
 
 3. **不支持** [CTeX 套装](http://www.ctex.org/CTeXDownload)。
 
