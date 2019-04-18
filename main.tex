@@ -14,6 +14,8 @@
 \usepackage{datatool}
 \usepackage{booktabs}
 \usepackage{siunitx}
+\usepackage{longtable}
+\usepackage{multirow}
 
 \sisetup{round-mode=places,
          table-number-alignment = center-decimal-marker
@@ -163,7 +165,39 @@
     \centering    
     \caption{使用\cs{csvautobooktabular}命令生成三线表\label{tab03}}
     \csvautobooktabular{db1.csv}% 数据文件
-  \end{table}           
+  \end{table}
+
+  \subsection{生成跨页长表格}
+  可以通过\cs{csvloop}命令引入\cs{longtable}环境，
+  以生成跨页表格。其示例代码如下，生成的表格如
+  表\ref{tabcsvsimpletab}所示。
+  
+  \csvloop{
+    file=db4.csv,
+    respect all,
+    separator=comma,
+    %no head,
+    before reading={
+      \begin{longtable}[c]{c*{6}{r}}
+        \caption[实验数据]{实验数据，这个题注十分的长，注意这在索引中的处理方式，还有 \cs{caption} 后面的双反斜杠}\label{tabcsvsimpletab}\\
+        \toprule
+    },
+    command={\csviffirstrow
+      {
+        \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
+        & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点} \\
+        & \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}&
+        \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{文件 (KB)} \\ \midrule
+        \endfirsthead        
+      }      
+      {\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv &
+        \csvcolvi & \csvcolvii}
+    },
+    late after line=\\,
+    late after first line=\\\midrule\endhead,
+    late after last line=\\\bottomrule,
+    after reading=\end{longtable}
+  }
 
   如果再结合\pkg{siunitx}、\pkg{longtable}、\pkg{xcolor}等宏包，则可以对
   生成的表格进行更为细致的控制，有关细节，请查阅\pkg{csvsimple}宏包使
@@ -311,6 +345,113 @@
       every last row/.style={after row=\bottomrule}, %
     ]{db3.csv} % filename/path to file
   \end{table}
+
+  \subsection{使用\pkg{longtable}宏包生成跨页表格}
+  可以通过\cs{begin table}和\cs{end table}参数引入\cs{longtable}环境，
+  以生成跨页表格。其示例代码如下，生成的表格如
+  表\ref{tabpgfltab}所示。
+
+  \begin{center}
+    \begin{minipage}[h]{0.9\linewidth}
+      \begin{codeonly}
+        \pgfplotstabletypeset[
+          multicolumn names, % 允许合并列名
+          col sep=comma, % 逗号数据分割
+          begin table=\begin{longtable}, % 使用longtable环境
+          end table=\end{longtable},      
+          display columns/0/.style={
+            column name={\multirow{2}{*}{测试程序}}, % 列名称
+            column type={c},string type},
+          display columns/1/.style={
+            column name=正常运行, % 列名称
+            column type={r},int detect},
+          display columns/2/.style={
+            column name=同步, % 列名称
+            column type={r},int detect},
+          display columns/3/.style={
+            column name=检测点, % 列名称
+            column type={r},int detect},
+          display columns/4/.style={
+            column name=卷回恢复, % 列名称
+            column type={r},int detect},
+          display columns/5/.style={
+            column name=进程迁移, % 列名称
+            column type={r},int detect},
+          display columns/6/.style={
+            column name=检查点, % 列名称
+            column type={r},int detect},      
+          every head row/.append style={
+            before row={\caption[实验数据]{实验数据，这个题注十分的长，注意这在索引中的处理方式，还有 \cs{caption} 后面的双反斜杠\label{tabpgfltab}}\\\toprule},
+            after row={%          
+              & 时间(s) & 时间(s) & 时间(s) & 时间(s) & 时间(s) & 文件(KB)\\ % 数据单位，用 & 分割
+              \midrule
+              \endfirsthead
+              \multicolumn{7}{c}{续表~\thetable\hskip1em 实验数据}\\
+              \toprule
+              \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
+              & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点} \\
+              & \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}&
+              \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{文件(KB)} \\ \midrule
+              \endhead
+              \hline
+              \multicolumn{7}{r}{续下页} \\
+              \endfoot
+              \endlastfoot
+            },
+          },
+          every last row/.style={after row=\bottomrule}, %
+        ]{db4.csv} % filename/path to file
+      \end{codeonly}
+    \end{minipage}
+  \end{center}
+
+  \pgfplotstabletypeset[
+    multicolumn names, % 允许合并列名
+    col sep=comma, % 逗号数据分割
+    begin table=\begin{longtable}, % 使用longtable环境
+    end table=\end{longtable},      
+    display columns/0/.style={
+      column name={\multirow{2}{*}{测试程序}}, % 列名称
+      column type={c},string type},
+    display columns/1/.style={
+      column name=正常运行, % 列名称
+      column type={r},int detect},
+    display columns/2/.style={
+      column name=同步, % 列名称
+      column type={r},int detect},
+    display columns/3/.style={
+      column name=检测点, % 列名称
+      column type={r},int detect},
+    display columns/4/.style={
+      column name=卷回恢复, % 列名称
+      column type={r},int detect},
+    display columns/5/.style={
+      column name=进程迁移, % 列名称
+      column type={r},int detect},
+    display columns/6/.style={
+      column name=检查点, % 列名称
+      column type={r},int detect},      
+    every head row/.append style={
+      before row={\caption[实验数据]{实验数据，这个题注十分的长，注意这在索引中的处理方式，还有 \cs{caption} 后面的双反斜杠\label{tabpgfltab}}\\\toprule},
+      after row={%          
+        & 时间(s) & 时间(s) & 时间(s) & 时间(s) & 时间(s) & 文件(KB)\\ % 数据单位，用 & 分割
+        \midrule
+        \endfirsthead
+        \multicolumn{7}{c}{续表~\thetable\hskip1em 实验数据}\\
+        \toprule
+        \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
+        & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点} \\
+        & \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}&
+        \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{文件(KB)} \\ \midrule
+        \endhead
+        \hline
+        \multicolumn{7}{r}{续下页} \\
+        \endfoot
+        \endlastfoot
+      },
+    },
+    every last row/.style={after row=\bottomrule}, %
+  ]{db4.csv} % filename/path to file
   
   另外，也可以使用\pkg{multirow}宏包、\cs{multicolumn}命令实现表格的行
   列合并。如果再结合\pkg{longtable}、\pkg{array}、\pkg{colortbl}等宏包，则可以对
@@ -326,7 +467,7 @@
   \subsection{简单方式}
   可以通过\cs{DTLloaddb}命令载入\csv 数据，然后用\cs{DTLdisplaydb}命令
   生成表格。其示例代码如下，生成的表格如
-  表\ref{tab07}所示\footnote{此处使用\cs{\DTLremoverow{mydb}{3}}命令删
+  表\ref{tab07}所示\footnote{此处使用\cs{DTLremoverow{mydb}{3}}命令删
     除了第3行数据。}。
 
   \begin{center}
@@ -374,9 +515,10 @@
       \end{codeonly}
     \end{minipage}
   \end{center}
+  
   \DTLloaddb{table}{db2.csv}% 可以在之前任何位置载入数据
   \DTLremoverow{table}{2} % 删除第2行数据
-  \begin{table}[htb]
+  \begin{table}[htb!]
     \centering    
     \caption{\cs{DTLforeach}循环命令生成表格\label{tab08}}
     \begin{tabular}{llc}
@@ -390,6 +532,73 @@
       \bottomrule
     \end{tabular}  
   \end{table}
+
+  \subsection{使用\pkg{longtable}宏包生成跨页表格}
+  可以通过\cs{DTLloaddb}命令载入\csv 数据，然后用\env{}环境结合\cs{DTLforeach}循环命令
+  生成跨页表格。其示例代码如下，生成的表格如
+  表\ref{tab09}所示。
+  \begin{center}
+    \begin{minipage}[h]{0.95\linewidth}
+      \begin{codeonly}
+        \DTLloaddb{ltab}{db4.csv}% 可以在之前任何位置载入数据
+        \begin{longtable}[c]{c*{6}{r}}
+          \caption[实验数据]{实验数据，这个题注十分的长，注意这在索引中的处理方式，还有 \cs{caption} 后面的双反斜杠}\label{tab09}\\
+          \toprule
+          \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
+          & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点}\tabularnewline
+          & \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}&
+          \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}&
+          \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{文件(KB)}
+          \tabularnewline   \midrule
+          \endfirsthead
+          \multicolumn{7}{c}{续表~\thetable\hskip1em 实验数据}\tabularnewline
+          \toprule
+          \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
+          & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点}\tabularnewline
+          & \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}&
+          \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}&
+          \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{文件(KB)}
+          \tabularnewline  \midrule
+          \endhead
+          \hline
+          \multicolumn{7}{r}{续下页}
+          \endfoot
+          \endlastfoot
+          \DTLforeach*{ltab}{\cola=cola, \colb=colb, \colc=colc, \cold=cold,
+                            \cole=cole, \colf=colf, \colg=colg}%
+              {\DTLiffirstrow{}{\tabularnewline}%
+              \cola & \colb & \colc & \cold & \cole & \colf & \colg}\\ % 数据列位置可任意
+          \bottomrule
+        \end{longtable}
+      \end{codeonly}
+    \end{minipage}
+  \end{center}
+  \DTLloaddb{ltab}{db4.csv}% 可以在之前任何位置载入数据
+  \begin{longtable}[c]{c*{6}{r}}
+        \caption[实验数据]{实验数据，这个题注十分的长，注意这在索引中的处理方式，还有 \cs{caption} 后面的双反斜杠}\label{tab09}\\
+        \toprule
+        \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
+        & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点} \\
+        & \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}&
+        \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{文件 (KB)} \\ \midrule
+        \endfirsthead
+        \multicolumn{7}{c}{续表~\thetable\hskip1em 实验数据}\\
+        \toprule
+        \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
+        & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点} \\
+        & \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}&
+        \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{文件(KB)} \\ \midrule
+        \endhead
+        \hline
+        \multicolumn{7}{r}{续下页}
+        \endfoot
+        \endlastfoot
+        \DTLforeach*{ltab}{\cola=cola, \colb=colb, \colc=colc, \cold=cold,
+                            \cole=cole, \colf=colf, \colg=colg}%
+              {\DTLiffirstrow{}{\tabularnewline}%
+              \cola & \colb & \colc & \cold & \cole & \colf & \colg}\\ % 数据列位置可任意
+        \bottomrule
+   \end{longtable}
         
   如果再结合\pkg{siunitx}、\pkg{longtable}、\pkg{booktabs}、\pkg{array}、\pkg{colortbl}等宏包，则可以对
   生成的表格进行更为细致的控制，有关细节，请查阅\pkg{pgfplotstable}宏包使
