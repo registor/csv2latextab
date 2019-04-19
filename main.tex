@@ -22,9 +22,35 @@
          }
 
 % 彩色表格
-%\usepackage[table]{xcolor}
 \usepackage{colortbl}
 
+% 定义跨页表表头
+\newcommand{\headrow}{
+   \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} &
+   \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} &
+   \multicolumn{1}{c}{卷回恢复} & \multicolumn{1}{c}{进程迁移} &
+   \multicolumn{1}{c}{检查点} \\
+   & \multicolumn{1}{c}{时间(s)} & \multicolumn{1}{c}{时间(s)} &
+   \multicolumn{1}{c}{时间(s)} & \multicolumn{1}{c}{时间(s)} &
+   \multicolumn{1}{c}{时间(s)} & \multicolumn{1}{c}{文件(KB)} \\
+ }
+ % 定义跨页表续表表题
+ \newcommand{\ctncap}{
+   \multicolumn{7}{c}{续表~\thetable\hskip1em 实验数据}  
+ }
+ % 定义跨页表命令集合
+ \newcommand{\ctntabcmd}{
+   \\\ctncap\\
+   \toprule
+   \headrow
+   \midrule
+   \endhead
+   \midrule
+   \multicolumn{7}{r}{续下页}\\
+   \endfoot
+   \endlastfoot  
+ }
+ 
 %%% 表格属性
 \colorlet{tableheadcolor}{black!60}
 \newcommand\tableheadfont{
@@ -172,43 +198,61 @@
   以生成跨页表格。其示例代码如下，生成的表格如
   表\ref{tabcsvsimpletab}所示。
 
-%   \csvreader[
-%   no head,
-%   longtable=
-%     |*{5}{>{\raggedright\arraybackslash}p{\dimexpr 0.2\linewidth-2\tabcolsep-1.2\arrayrulewidth}|},
-%   table head=\hline,
-%   late after line=\\\hline,
-%   late after last line=\\\hline\caption{My nice table}
-% ]{db4.csv}
-%   {1=\one, 2=\two, 3=\three, 4=\four, 5=\five}
-%   {\one & \two & \three & \four & \fiv
+  \begin{center}
+    \begin{minipage}[h]{0.75\linewidth}
+      \begin{codeonly}
+        \csvloop{
+          file=db4.csv,
+          respect all,
+          separator=comma,
+          no head,
+          before reading={
+            \begin{longtable}[c]{c*{6}{r}}
+            \caption[实验数据]{实验数据，这个题注十分的长，注意这在索引中的处理方式，还有 \cs{caption} 后面的双反斜杠}\label{tabcsvsimpletab}\\
+            \toprule
+          },
+          command={\csviffirstrow
+            {
+              \headrow
+              \midrule
+              \endfirsthead        
+            }      
+            {\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv &
+             \csvcolvi & \csvcolvii}
+          },
+          late after line=\\,
+          late after first line=\ctntabcmd,
+          late after last line=\\\bottomrule,
+          after reading=\end{longtable}
+        }    
+      \end{codeonly}      
+    \end{minipage}
+  \end{center}  
   
-  % \csvloop{
-  %   file=db4.csv,
-  %   respect all,
-  %   separator=comma,
-  %   %no head,
-  %   before reading={
-  %     \begin{longtable}[c]{c*{6}{r}}
-  %       \caption[实验数据]{实验数据，这个题注十分的长，注意这在索引中的处理方式，还有 \cs{caption} 后面的双反斜杠}\label{tabcsvsimpletab}\\
-  %       \toprule
-  %   },
-  %   command={\csviffirstrow
-  %     {
-  %       \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
-  %       & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点} \\
-  %       & \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}&
-  %       \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{文件 (KB)} \\ \midrule
-  %       \endfirsthead        
-  %     }      
-  %     {\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv &
-  %       \csvcolvi & \csvcolvii}
-  %   },
-  %   late after line=\\,
-  %   late after first line=\\\midrule\endhead,
-  %   late after last line=\\\bottomrule,
-  %   after reading=\end{longtable}
-  % }
+  \csvloop{
+    file=db4.csv,
+    respect all,
+    separator=comma,
+    no head,
+    before reading={
+      \begin{longtable}[c]{c*{6}{r}}
+        \caption[实验数据]{实验数据，这个题注十分的长，注意这在索引中的处理方式，还有 \cs{caption} 后面的双反斜杠}\label{tabcsvsimpletab}\\
+        \toprule
+    },
+    command={\csviffirstrow
+      {
+        \headrow
+        \midrule
+        \endfirsthead        
+      }      
+      {\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv &
+        \csvcolvi & \csvcolvii}
+    },
+    late after line=\\,
+    late after first line=\ctntabcmd,
+    late after last line=\\\bottomrule,
+    after reading=\end{longtable}
+  }
 
   如果再结合\pkg{siunitx}、\pkg{longtable}、\pkg{xcolor}等宏包，则可以对
   生成的表格进行更为细致的控制，有关细节，请查阅\pkg{csvsimple}宏包使
@@ -397,12 +441,10 @@
               & 时间(s) & 时间(s) & 时间(s) & 时间(s) & 时间(s) & 文件(KB)\\ % 数据单位，用 & 分割
               \midrule
               \endfirsthead
-              \multicolumn{7}{c}{续表~\thetable\hskip1em 实验数据}\\
+              \ctncap\\
               \toprule
-              \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
-              & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点} \\
-              & \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}&
-              \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{文件(KB)} \\ \midrule
+              \headrow
+              \midrule
               \endhead
               \hline
               \multicolumn{7}{r}{续下页} \\
@@ -448,12 +490,10 @@
         & 时间(s) & 时间(s) & 时间(s) & 时间(s) & 时间(s) & 文件(KB)\\ % 数据单位，用 & 分割
         \midrule
         \endfirsthead
-        \multicolumn{7}{c}{续表~\thetable\hskip1em 实验数据}\\
+        \ctncap\\
         \toprule
-        \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
-        & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点} \\
-        & \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}&
-        \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{文件(KB)} \\ \midrule
+        \headrow
+        \midrule
         \endhead
         \hline
         \multicolumn{7}{r}{续下页} \\
@@ -555,21 +595,13 @@
         \begin{longtable}[c]{c*{6}{r}}
           \caption[实验数据]{实验数据，这个题注十分的长，注意这在索引中的处理方式，还有 \cs{caption} 后面的双反斜杠}\label{tab09}\\
           \toprule
-          \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
-          & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点}\tabularnewline
-          & \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}&
-          \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}&
-          \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{文件(KB)}
-          \tabularnewline   \midrule
+          \headrow
+          \midrule
           \endfirsthead
-          \multicolumn{7}{c}{续表~\thetable\hskip1em 实验数据}\tabularnewline
+          \ctncap\tabularnewline
           \toprule
-          \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
-          & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点}\tabularnewline
-          & \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}&
-          \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{时间(s)}&
-          \multicolumn{1}{c}{时间(s)}& \multicolumn{1}{c}{文件(KB)}
-          \tabularnewline  \midrule
+          \headrow
+          \midrule
           \endhead
           \hline
           \multicolumn{7}{r}{续下页}
@@ -588,17 +620,13 @@
   \begin{longtable}[c]{c*{6}{r}}
         \caption[实验数据]{实验数据，这个题注十分的长，注意这在索引中的处理方式，还有 \cs{caption} 后面的双反斜杠}\label{tab09}\\
         \toprule
-        \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
-        & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点} \\
-        & \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}&
-        \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{文件 (KB)} \\ \midrule
+        \headrow
+        \midrule
         \endfirsthead
-        \multicolumn{7}{c}{续表~\thetable\hskip1em 实验数据}\\
+        \ctncap\\
         \toprule
-        \multirow{2}{*}{测试程序} & \multicolumn{1}{c}{正常运行} & \multicolumn{1}{c}{同步} & \multicolumn{1}{c}{检查点} & \multicolumn{1}{c}{卷回恢复}
-        & \multicolumn{1}{c}{进程迁移} & \multicolumn{1}{c}{检查点} \\
-        & \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}&
-        \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{时间 (s)}& \multicolumn{1}{c}{文件(KB)} \\ \midrule
+        \headrow
+        \midrule
         \endhead
         \hline
         \multicolumn{7}{r}{续下页}
