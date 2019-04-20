@@ -12,6 +12,10 @@ CSV文件称逗号分隔值(Comma-Separated Values, CSV,有时也称为字符分
 都有完全相同的字段序列。 CSV文件都是纯文本文件，可以使用记事本、 Excel等软件进行生成或编辑，是一种比较方便的数据管理方式。在LaTeX中可以采用csvsimple、pgfplotstable、datatool、csvtools等宏
 包直接使用CSV文件的数据生成LaTeX表格。
 
+具备软件协作意识，是非常重要的事。排版是LaTeX的事，而处理数据一定是Excel、MATLAB等软件，C语言、R语言等这些语言的事，各负其责，通力合作才是高效工作之道。在一个软件里干所有的事，不是好办法！
+
+Happy LaTeXing！~
+
 注意：
 
 1. 本文档要求 TeXLive、MacTeX、MikTeX 不低于 2018 年的发行版，并且尽可能升级到最新。
